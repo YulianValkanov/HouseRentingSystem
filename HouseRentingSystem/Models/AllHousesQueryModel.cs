@@ -21,7 +21,7 @@ namespace HouseRentingSystem.Models
 
             public IEnumerable<HouseServiceModel> Houses { get; set; } = Enumerable.Empty<HouseServiceModel>();
 
+             
 
-
-        }
+    }
 }

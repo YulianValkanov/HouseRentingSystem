@@ -80,6 +80,73 @@ namespace HouseRentingSystem.Core.Services
             return result;
         }
 
+        public async Task<IEnumerable<HouseServiceModel>> AllHousesByAgentId(int id)
+        {
+            return await repo.AllReadonly<House>()
+              //  .Where(c => c.IsActive)
+                .Where(c => c.AgentId == id)
+                .Select(c => new HouseServiceModel()
+                {
+                    Address = c.Address,
+                    Id = c.Id,
+                    ImageUrl = c.ImageUrl,
+                    IsRented = c.RenterId != null,
+                    PricePerMonth = c.PricePerMonth,
+                    Title = c.Title
+                })
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<HouseServiceModel>> AllHousesByUserId(string userId)
+        {
+            return await repo.AllReadonly<House>()
+                .Where(c => c.RenterId == userId)
+              //  .Where(c => c.IsActive)
+                .Select(c => new HouseServiceModel()
+                {
+                    Address = c.Address,
+                    Id = c.Id,
+                    ImageUrl = c.ImageUrl,
+                    IsRented = c.RenterId != null,
+                    PricePerMonth = c.PricePerMonth,
+                    Title = c.Title
+                })
+                .ToListAsync();
+        }
+
+        public async Task<bool> Exists(int id)
+        {
+            return await repo.AllReadonly<House>()
+                .AnyAsync(h => h.Id == id 
+            //    && h.IsActive
+                );
+        }
+
+        public async Task<HouseDetailsModel> HouseDetailsById(int id)
+        {
+            return await repo.AllReadonly<House>()
+               // .Where(h => h.IsActive)
+                .Where(h => h.Id == id)
+                .Select(h => new HouseDetailsModel()
+                {
+                    Address = h.Address,
+                    Category = h.Category.Name,
+                    Description = h.Description,
+                    Id = id,
+                    ImageUrl = h.ImageUrl,
+                    IsRented = h.RenterId != null,
+                    PricePerMonth = h.PricePerMonth,
+                    Title = h.Title,
+                    Agent = new Models.Agent.AgentServiceModel()
+                    {
+                        Email = h.Agent.User.Email,
+                        PhoneNumber = h.Agent.PhoneNumber
+                    }
+
+                })
+                .FirstAsync();
+        }
+
 
         public  async Task<IEnumerable<string>> AllCategoriesNames()
         {
