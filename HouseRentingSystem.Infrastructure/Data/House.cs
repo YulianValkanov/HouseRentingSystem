@@ -49,7 +49,7 @@ namespace HouseRentingSystem.Infrastructure.Data
         public IdentityUser? Renter { get; set; }
 
 
-
+        public bool isActive { get; set; } = true;
 
 
 
