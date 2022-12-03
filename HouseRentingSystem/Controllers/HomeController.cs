@@ -14,6 +14,7 @@ namespace HouseRentingSystem.Controllers
             houseService    = _houseService;
         }
 
+
         public async Task< IActionResult> Index()
         {
             var model = await houseService.LastThreeHouses();

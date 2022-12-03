@@ -1,10 +1,12 @@
 ﻿using HouseRentingSystem.Core.Contracts;
+using HouseRentingSystem.Core.Extensions;
 using HouseRentingSystem.Core.Models.House;
 using HouseRentingSystem.Extensions;
 using HouseRentingSystem.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
 
 namespace HouseRentingSystem.Controllers
 {
@@ -14,13 +16,17 @@ namespace HouseRentingSystem.Controllers
         private readonly IHouseService houseService;
 
         private readonly IAgentService agentService;
+
+        private readonly ILogger logger;
+
         public HouseController(
             IHouseService _houseService,
-            IAgentService _agentService
-            )
+            IAgentService _agentService,
+            ILogger<HouseController> _logger)
         {
             houseService = _houseService;
             agentService = _agentService;
+            logger = _logger;
         }
 
 
@@ -64,7 +70,7 @@ namespace HouseRentingSystem.Controllers
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id, string information)
         {
             if ((await houseService.Exists(id)) == false)
             {
@@ -72,6 +78,13 @@ namespace HouseRentingSystem.Controllers
             }
 
             var model = await houseService.HouseDetailsById(id);
+
+            if (information != model.GetInformation())
+            {
+                TempData["ErrorMessage"] = "Don't touch my slug!";
+
+                return RedirectToAction("Index", "Home");
+            }
 
             return View(model);
         }
@@ -119,7 +132,7 @@ namespace HouseRentingSystem.Controllers
 
             int id = await houseService.Create(model, agentId);
 
-            return RedirectToAction(nameof(Details),new {id});
+            return RedirectToAction(nameof(Details),new {id=id, Information=model.GetInformation() });
 
         }
 
@@ -134,7 +147,7 @@ namespace HouseRentingSystem.Controllers
 
             if ((await houseService.HasAgentWithId(id, User.Id())) == false)
             {
-              //  logger.LogInformation("User with id {0} attempted to open other agent house", User.Id());
+               logger.LogInformation("User with id {0} attempted to open other agent house", User.Id());
 
                 return RedirectToPage("/Account/AccessDenied", new { area = "Identity" });
             }
@@ -197,7 +210,7 @@ namespace HouseRentingSystem.Controllers
 
             await houseService.Edit(model.Id, model);
 
-            return RedirectToAction(nameof(Details), new { id = model.Id });//, information = model.GetInformation() });
+            return RedirectToAction(nameof(Details), new { id = model.Id , information = model.GetInformation() });
 
         }
 
